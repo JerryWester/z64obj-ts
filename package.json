@@ -9,11 +9,15 @@
     "Jerry Wester <jerrywester@yahoo.com>"
   ],
   "scripts": {
+    "start": "node dist/program.js",
     "build": "tsc",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@types/node": "^16.7.8",
-    "typescript": "^4.4.2"
+    "@types/node": "^16.7.8"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.2",
+    "yarn": "^1.22.11"
   }
 }
