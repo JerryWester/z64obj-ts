@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "z64obj": {
-      "commandName": "Project",
-      "commandLineArgs": "C:\\N64\\Zelda\\roms\\oot\\oot_u10\\oot_u10_d.z64 object_link_boy.json"
-    }
-  }
-}

@@ -1,0 +1,19 @@
+{
+  "name": "z64obj_ts",
+  "version": "1.0.0",
+  "description": "To be paired with z64obj_gcc, this is an asset procesor.",
+  "main": "dist/program.js",
+  "repository": "git@github.com:JerryWester/z64obj-ts.git",
+  "author": "Nick <DJInsomniaPro@gmail.com>",
+  "contributors": [
+    "Jerry Wester <jerrywester@yahoo.com>"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@types/node": "^16.7.8",
+    "typescript": "^4.4.2"
+  }
+}
