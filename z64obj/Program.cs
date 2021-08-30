@@ -5,6 +5,8 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using z64obj.Binary;
+
 namespace z64obj
 {
     class Program
@@ -27,13 +29,8 @@ namespace z64obj
                 Console.WriteLine($"Extracting {json["objectDetails"]["fileName"]}...");
                 int vROMStart = Convert.ToInt32($"{json["objectDetails"]["vromStartAddress"]}", 16);
                 int vROMEnd = Convert.ToInt32($"{json["objectDetails"]["vromEndAddress"]}", 16);
-                int size = vROMEnd - vROMStart;
 
-                byte[] extractedFile = new byte[size];
-                for (int i = vROMStart; i < vROMStart + size; i++)
-                {
-                    extractedFile[i - vROMStart] = src[i];
-                }
+                byte[] extractedFile = src.BlockCopy(vROMStart, (vROMEnd - vROMStart));
 
                 if (extractedFile.Length > 0)
                 {
