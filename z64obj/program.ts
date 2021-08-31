@@ -1,4 +1,6 @@
 import fs from 'fs';
+import { DisplayList } from './assets/displayList';
+import { ZObject } from './assets/ZObject';
 
 interface IObjectMeta {
     objectDetails: {
@@ -6,7 +8,12 @@ interface IObjectMeta {
       vromStartAddress: string,
       vromEndAddress: string,
       fileName: string
-    }
+    },
+    displayLists: {
+        segmentOffset: string,
+        infoDescriptor: string,
+        symbolName: string
+    }[]
 }
 
 const loadJSON = (path: string) => JSON.parse(fs.readFileSync(path).toString()) as IObjectMeta;
@@ -16,6 +23,28 @@ function main(args: string[]) {
     let zobjJSON = loadJSON(args[1]);
 
     extract(baseROM, zobjJSON);
+
+    let zobjBytes = fs.readFileSync(zobjJSON.objectDetails.fileName);
+    let zobjProcessed = new ZObject();
+    for (const dlist of zobjJSON.displayLists) {
+        let dl = new DisplayList(zobjJSON.objectDetails.fileName, zobjBytes, Number.parseInt(dlist.segmentOffset, 16));
+        dl.comment = dlist.infoDescriptor;
+        dl.symbol = dlist.symbolName;
+
+        zobjProcessed.displayLists.push(dl);
+    }
+    // JArray dLists = JArray.FromObject(zobjJSON["displayLists"]);
+    // if (dLists.Count > 0)
+    // {
+    //     for (int i = 0; i < dLists.Count; i++)
+    //     {
+    //         Assets.DisplayList dl = new Assets.DisplayList(zobjFilename, zobjBytes, Convert.ToUInt32($"{dLists[i]["segmentOffset"]}", 16));
+    //         dl.Comment = $"{dLists[i]["infoDescriptor"]}";
+    //         dl.Symbol = $"{dLists[i]["symbolName"]}";
+
+    //         zobjProcessed.DisplayLists.Add(dl);
+    //     }
+    // }
 }
 
 function extract(src: Buffer, json: IObjectMeta) {

@@ -1,4 +1,4 @@
-export class segmentAddress {
+export class SegmentAddress {
     public segment: number;
     public offset: number;
 
@@ -17,7 +17,7 @@ export class segmentAddress {
             this.offset = a2;
         }
         else { // no args
-            this.segment = 0
+            this.segment = 0;
             this.offset = 0;
         }
     }
