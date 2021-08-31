@@ -118,5 +118,7 @@ dist
 .pnp.*
 
 # Zelda files.
-.zobj
-.z64
+*.zobj
+*.z64
+object_link_boy.json
+gfxdis_z64obj.f3dex2

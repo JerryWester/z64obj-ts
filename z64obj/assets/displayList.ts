@@ -34,9 +34,10 @@ export class DisplayList {
 
     
     public static disassemble(fileName: string, segAddr: SegmentAddress) {
-        let proc = spawnSync(`gfxdis_z64obj.f3dex2 -f ${resolve(fileName)} -a 0x${segAddr.offset.toString().toUpperCase().padStart(6, "0")}`,
+        let proc = spawnSync(`gfxdis_z64obj.f3dex2`,
+            [`-f`, `${resolve(fileName)}`, `-a`, `0x${segAddr.offset.toString(16).toUpperCase().padStart(6, "0")}`],
             { encoding: "utf-8", shell: false });
-
-        return proc.stdout.split("!");
+        if (proc.stderr) throw proc.stderr;
+        return proc.stdout.substr(0, proc.stdout.length - 2).split("!");
     }
 }
