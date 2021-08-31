@@ -23,7 +23,7 @@ export class DisplayList {
             }
             this.raw = Buffer.alloc(dlSize);
             src.copy(this.raw, 0, this.address.offset, this.address.offset + dlSize);
-            this.disassembled = DisplayList.disassemble(srcFile, this.address); // @TODO: finish this
+            this.disassembled = DisplayList.disassemble(srcFile, this.address);
         }
         else {
             this.address = new SegmentAddress();

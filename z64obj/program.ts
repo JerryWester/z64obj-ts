@@ -33,18 +33,6 @@ function main(args: string[]) {
 
         zobjProcessed.displayLists.push(dl);
     }
-    // JArray dLists = JArray.FromObject(zobjJSON["displayLists"]);
-    // if (dLists.Count > 0)
-    // {
-    //     for (int i = 0; i < dLists.Count; i++)
-    //     {
-    //         Assets.DisplayList dl = new Assets.DisplayList(zobjFilename, zobjBytes, Convert.ToUInt32($"{dLists[i]["segmentOffset"]}", 16));
-    //         dl.Comment = $"{dLists[i]["infoDescriptor"]}";
-    //         dl.Symbol = $"{dLists[i]["symbolName"]}";
-
-    //         zobjProcessed.DisplayLists.Add(dl);
-    //     }
-    // }
 }
 
 function extract(src: Buffer, json: IObjectMeta) {
