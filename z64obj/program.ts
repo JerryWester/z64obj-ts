@@ -13,7 +13,23 @@ interface IObjectMeta {
         segmentOffset: string,
         infoDescriptor: string,
         symbolName: string
-    }[]
+    }[],
+    textureImages: {
+        segmentOffset: string,
+        infoDescriptor: string,
+        fmtCodec: string,
+        imgDimensions: [
+            number,
+            number
+        ],
+        imgPalette: string,
+        symbolName: string
+    }[],
+    texturePalettes: {
+        segmentOffset: string,
+        infoDescriptor: string,
+        blockSize: string
+    }[],
 }
 
 const loadJSON = (path: string) => JSON.parse(fs.readFileSync(path).toString()) as IObjectMeta;
