@@ -11,11 +11,7 @@ export class GfxInstruction {
     constructor();
     constructor(_gfx: string);
     constructor(_gfx?: string) {
-        if (!_gfx) {
-            this.opcode = "";
-            this.parameters = [];
-        }
-        else {
+        if (_gfx !== undefined) {
             let match = _gfx.match(/(\S*)\((.*)\)/);
 
             if (match && match.length > 2) { // asserts that there was a match
@@ -26,6 +22,10 @@ export class GfxInstruction {
                 this.opcode = "";
                 this.parameters = [];
             }
+        }
+        else {
+            this.opcode = "";
+            this.parameters = [];
         }
     }
 
@@ -44,7 +44,7 @@ export class DisplayList {
     constructor();
     constructor(srcFile: string, src: Buffer, addr: number)
     constructor(srcFile?: string, src?: Buffer, addr?: number) {
-        if (srcFile && src && addr) {
+        if (srcFile !== undefined && src !== undefined && addr !== undefined) {
             this.address = new SegmentAddress(addr);
             let dlSize = 0;
             while (src[this.address.offset + dlSize] !== 0xDF) {

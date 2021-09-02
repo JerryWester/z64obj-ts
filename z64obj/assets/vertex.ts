@@ -9,7 +9,7 @@ export class VertexBlock {
     constructor();
     constructor(src: Buffer, address: number, size: number);
     constructor(src?: Buffer, address?: number, size?: number) {
-        if (src && address && size) {
+        if (src !== undefined && address !== undefined && size !== undefined) {
             this.address = new SegmentAddress(address);
             this.raw = Buffer.alloc(size);
             src.copy(this.raw, 0, this.address.offset, this.address.offset + size);
