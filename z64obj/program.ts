@@ -1,21 +1,17 @@
 import fs from 'fs';
-import { DisplayList } from './assets/displayList';
+import { DisplayList, IDisplayListMeta } from './assets/displayList';
 import { SegmentAddress } from './assets/segment';
 import { Skeleton } from './assets/skeleton';
 import { ZObject } from './assets/ZObject';
 
-interface IObjectMeta {
+export interface IObjectMeta {
     objectDetails: {
       extractFromROM: boolean,
       vromStartAddress: string,
       vromEndAddress: string,
       fileName: string
     },
-    displayLists?: {
-        segmentOffset: string,
-        infoDescriptor: string,
-        symbolName: string
-    }[],
+    displayLists?: IDisplayListMeta[],
     textureImages?: {
         segmentOffset: string,
         infoDescriptor: string,
@@ -64,9 +60,7 @@ function main(args: string[]) {
     if (zobjJSON.displayLists) {
         console.log("Display lists section found in JSON. Collecting display lists...");
         for (const dlist of zobjJSON.displayLists) {
-            let dl = new DisplayList(zobjJSON.objectDetails.fileName, zobjBytes, Number.parseInt(dlist.segmentOffset, 16));
-            dl.comment = dlist.infoDescriptor;
-            dl.symbol = dlist.symbolName;
+            let dl = new DisplayList(zobjJSON.objectDetails.fileName, zobjBytes, dlist);
 
             zobjProcessed.displayLists.push(dl);
         }

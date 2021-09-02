@@ -1,8 +1,15 @@
 import { SegmentAddress } from "./segment";
 import { spawnSync } from "child_process";
 import { resolve } from "path";
+import { IObjectMeta } from "../program";
 
 export type MacroNames = "gsSPMatrix" | "gsSPVertex";
+
+export interface IDisplayListMeta {
+    segmentOffset: string,
+    infoDescriptor: string,
+    symbolName: string
+}
 
 export class GfxInstruction {
     public opcode: string;
@@ -42,10 +49,10 @@ export class DisplayList {
     public disassembled: GfxInstruction[];
 
     constructor();
-    constructor(srcFile: string, src: Buffer, addr: number)
-    constructor(srcFile?: string, src?: Buffer, addr?: number) {
-        if (srcFile !== undefined && src !== undefined && addr !== undefined) {
-            this.address = new SegmentAddress(addr);
+    constructor(srcFile: string, src: Buffer, json: IDisplayListMeta);
+    constructor(srcFile?: string, src?: Buffer, meta?: IDisplayListMeta) {
+        if (srcFile !== undefined && src !== undefined && meta !== undefined) {
+            this.address = new SegmentAddress(Number.parseInt(meta.segmentOffset, 16));
             let dlSize = 0;
             while (src[this.address.offset + dlSize] !== 0xDF) {
                 dlSize += 8;
@@ -53,6 +60,8 @@ export class DisplayList {
             this.raw = Buffer.alloc(dlSize);
             src.copy(this.raw, 0, this.address.offset, this.address.offset + dlSize);
             this.disassembled = DisplayList.disassemble(srcFile, this.address);
+            this.symbol = meta.symbolName;
+            this.comment = meta.infoDescriptor;
         }
         else {
             this.address = new SegmentAddress();
