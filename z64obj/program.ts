@@ -1,5 +1,7 @@
 import fs from 'fs';
 import { DisplayList } from './assets/displayList';
+import { SegmentAddress } from './assets/segment';
+import { Skeleton } from './assets/skeleton';
 import { ZObject } from './assets/ZObject';
 
 interface IObjectMeta {
@@ -9,12 +11,12 @@ interface IObjectMeta {
       vromEndAddress: string,
       fileName: string
     },
-    displayLists: {
+    displayLists?: {
         segmentOffset: string,
         infoDescriptor: string,
         symbolName: string
     }[],
-    textureImages: {
+    textureImages?: {
         segmentOffset: string,
         infoDescriptor: string,
         fmtCodec: string,
@@ -25,11 +27,26 @@ interface IObjectMeta {
         imgPalette: string,
         symbolName: string
     }[],
-    texturePalettes: {
+    texturePalettes?: {
         segmentOffset: string,
         infoDescriptor: string,
         blockSize: string
     }[],
+    skeletonTrees?: {
+        segmentOffset: string,
+        infoDescriptor: string,
+        isFlexSkeleton: boolean
+    }[],
+    externalSegments?: {
+        segmentOffset: string,
+        infoDescriptor: string,
+        symbolName: string
+    }[],
+    miscellaneousData?: {
+        segmentOffset: string,
+        infoDescriptor: string,
+        blockSize: string
+    }[]
 }
 
 const loadJSON = (path: string) => JSON.parse(fs.readFileSync(path).toString()) as IObjectMeta;
@@ -42,13 +59,38 @@ function main(args: string[]) {
 
     let zobjBytes = fs.readFileSync(zobjJSON.objectDetails.fileName);
     let zobjProcessed = new ZObject();
-    for (const dlist of zobjJSON.displayLists) {
-        let dl = new DisplayList(zobjJSON.objectDetails.fileName, zobjBytes, Number.parseInt(dlist.segmentOffset, 16));
-        dl.comment = dlist.infoDescriptor;
-        dl.symbol = dlist.symbolName;
 
-        zobjProcessed.displayLists.push(dl);
+    // Collect Display Lists
+    if (zobjJSON.displayLists) {
+        console.log("Display lists section found in JSON. Collecting display lists...");
+        for (const dlist of zobjJSON.displayLists) {
+            let dl = new DisplayList(zobjJSON.objectDetails.fileName, zobjBytes, Number.parseInt(dlist.segmentOffset, 16));
+            dl.comment = dlist.infoDescriptor;
+            dl.symbol = dlist.symbolName;
+
+            zobjProcessed.displayLists.push(dl);
+        }
+        console.log(`Collected Display Lists! (${zobjProcessed.displayLists.length})`);
     }
+
+    // Extract Assets
+    // -- Vertex Data
+    zobjProcessed.extractVertices(zobjBytes);
+    console.log("Vertex Blocks Extracted!");
+    // -- Skeletons
+    if (zobjJSON.skeletonTrees) {
+        console.log("Skeletons section found in JSON. Collecting skeletons...")
+        for (const skeleton of zobjJSON.skeletonTrees) {
+            zobjProcessed.skeletons.push(
+                new Skeleton(zobjBytes, new SegmentAddress(Number.parseInt(skeleton.segmentOffset, 16)), skeleton.isFlexSkeleton)
+            );
+        }
+        console.log(`Collected Skeletons! (${zobjProcessed.skeletons.length})`);
+    }
+
+    zobjProcessed.displayLists[0].symbolize();
+
+
 }
 
 function extract(src: Buffer, json: IObjectMeta) {

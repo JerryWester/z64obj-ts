@@ -4,12 +4,42 @@ import { resolve } from "path";
 
 export type MacroNames = "gsSPMatrix" | "gsSPVertex";
 
+export class GfxInstruction {
+    public opcode: string;
+    public parameters: string[];
+
+    constructor();
+    constructor(_gfx: string);
+    constructor(_gfx?: string) {
+        if (!_gfx) {
+            this.opcode = "";
+            this.parameters = [];
+        }
+        else {
+            let match = _gfx.match(/(\S*)\((.*)\)/);
+
+            if (match && match.length > 2) { // asserts that there was a match
+                this.opcode = match[1] as MacroNames;
+                this.parameters = match[2].split(',').map(val => val.trim());
+            }
+            else {
+                this.opcode = "";
+                this.parameters = [];
+            }
+        }
+    }
+
+    public toString() {
+        return `${this.opcode}(${this.parameters.join(", ")})`;
+    }
+}
+
 export class DisplayList {
     public symbol = "";
     public comment = "";
     public address: SegmentAddress;
     public raw: Buffer;
-    public disassembled: string[];
+    public disassembled: GfxInstruction[];
 
     constructor();
     constructor(srcFile: string, src: Buffer, addr: number)
@@ -36,35 +66,25 @@ export class DisplayList {
             ['-f', resolve(fileName), '-a', `0x${segAddr.offset.toString(16).toUpperCase().padStart(6, "0")}`],
             { encoding: "utf-8", shell: false });
         if (proc.stderr) throw proc.stderr;
-        return proc.stdout.substr(0, proc.stdout.length - 2).split("!");
+        return proc.stdout.substr(0, proc.stdout.length - 2).split("!").map(dl => new GfxInstruction(dl));
     }
 
-    public static symbolize(dl: DisplayList) {
-        for (let i = 0; i < dl.disassembled.length; i++) {
-            let match = dl.disassembled[i].match(/(\S*)\((.*)\)/);
+    public symbolize() {
+        for (let i = 0; i < this.disassembled.length; i++) {
+            switch (this.disassembled[i].opcode as MacroNames) {
+                case "gsSPMatrix": {
+                    let dataAddress = new SegmentAddress(Number.parseInt(this.disassembled[i].parameters[0], 16));
+                    if (dataAddress.segment == 0x0D)
+                    {
+                        this.disassembled[i].parameters[0] = `LIMB_MATRIX(LIMB_${(dataAddress.offset / 0x40).toString().padStart(2,"0")})`;
+                    }
+                } break;
 
-            if (match && match.length > 2) { // asserts that there was a match
-                let macroName = match[1] as MacroNames;
-                let macroParams = match[2].split(',').map(val => val.trim());
-
-                switch (macroName) {
-                    case "gsSPMatrix": {
-                        let dataAddress = new SegmentAddress(Number.parseInt(macroParams[0], 16));
-                        if (dataAddress.segment == 0x0D)
-                        {
-                            macroParams[0] = `LIMB_MATRIX(LIMB_${(dataAddress.offset / 0x40).toString().padStart(2,"0")})`;
-                        }
-                    } break;
-
-                    case "gsSPVertex": {
-                        let dataAddress = new SegmentAddress(Number.parseInt(macroParams[0], 16));
-                        macroParams[0] = `&vtx_${dataAddress.offset.toString(16).toUpperCase().padStart(6,"0")}`;
-                        macroParams[1] = `Vtx_sizeof(${macroParams[0]})`;
-                    } break;
-                }
-
-                dl.disassembled[i] = `${macroName}(${macroParams.join(', ')})`;
-                console.log(dl.disassembled[i]);
+                case "gsSPVertex": {
+                    let dataAddress = new SegmentAddress(Number.parseInt(this.disassembled[i].parameters[0], 16));
+                    this.disassembled[i].parameters[0] = `&vtx_${dataAddress.offset.toString(16).toUpperCase().padStart(6,"0")}`;
+                    this.disassembled[i].parameters[1] = `Vtx_sizeof(${this.disassembled[i].parameters[0]})`;
+                } break;
             }
         }
     }
